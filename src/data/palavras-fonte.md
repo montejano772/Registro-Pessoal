@@ -2,9 +2,9 @@
 
 Arquivo gerado por `npm run importar:palavras`.
 
-Fonte: https://github.com/pythonprobr/palavras
+Fonte local: `palavras.txt`, na raiz do projeto.
 
-A lista original declara licença MPL-2.0 e informa que o arquivo `palavras.txt` contém mais de 320.000 palavras do português brasileiro, com fonte principal no dicionário pt-BR do LibreOffice.
+A lista local foi copiada de https://github.com/pythonprobr/palavras. O projeto original declara licença MPL-2.0 e informa que o arquivo `palavras.txt` contém mais de 320.000 palavras do português brasileiro, com fonte principal no dicionário pt-BR do LibreOffice.
 
 Filtro aplicado para o jogo:
 
