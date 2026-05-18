@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { formatarTempo, SEGUNDOS_CONTAGEM_REGRESSIVA, tempoVisualRestante } from "@/lib/tempo";
+import { formatarTempo, tempoVisualRestante } from "@/lib/tempo";
 
 type CronometroProps = {
   tempoRestante: number;
   turnoIniciadoEm: string | null;
   ativo: boolean;
-  segundosDeEspera?: number;
   onTempoEsgotado?: () => void;
 };
 
@@ -15,7 +14,6 @@ export function Cronometro({
   tempoRestante,
   turnoIniciadoEm,
   ativo,
-  segundosDeEspera = SEGUNDOS_CONTAGEM_REGRESSIVA,
   onTempoEsgotado
 }: CronometroProps) {
   const [valor, setValor] = useState(tempoRestante);
@@ -32,7 +30,7 @@ export function Cronometro({
     }
 
     const atualizar = () => {
-      const restante = tempoVisualRestante(tempoRestante, turnoIniciadoEm, segundosDeEspera);
+      const restante = tempoVisualRestante(tempoRestante, turnoIniciadoEm);
       setValor(restante);
 
       if (restante <= 0 && !esgotadoAvisado.current) {
@@ -44,7 +42,7 @@ export function Cronometro({
     atualizar();
     const id = window.setInterval(atualizar, 250);
     return () => window.clearInterval(id);
-  }, [ativo, onTempoEsgotado, segundosDeEspera, tempoRestante, turnoIniciadoEm]);
+  }, [ativo, onTempoEsgotado, tempoRestante, turnoIniciadoEm]);
 
   return <div className={`cronometro ${valor <= 10 ? "cronometro-alerta" : ""}`}>{formatarTempo(valor)}</div>;
 }

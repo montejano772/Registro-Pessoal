@@ -79,7 +79,10 @@ export default function JogoPage({ params }: { params: Promise<{ codigo: string 
 
   return (
     <main className="pagina jogo">
-      <ContagemRegressiva chaveTurno={`${partida.rodada_atual}-${partida.jogador_atual_id}`} />
+      <ContagemRegressiva
+        chaveTurno={`${partida.rodada_atual}-${partida.jogador_atual_id}`}
+        turnoIniciadoEm={partida.turno_iniciado_em}
+      />
 
       <section className="placar-topo">
         <span>Rodada {partida.rodada_atual}</span>

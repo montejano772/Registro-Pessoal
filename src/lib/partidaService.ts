@@ -2,7 +2,7 @@ import { carregarJogadores, proximoJogadorAtivo, todosResponderamRodada } from "
 import { carregarPalavrasUsadas, salvarPalavraUsada } from "./palavrasService";
 import { sortearSilaba } from "./sortearSilaba";
 import { supabase } from "./supabaseClient";
-import { calcularTempoGasto, SEGUNDOS_CONTAGEM_REGRESSIVA } from "./tempo";
+import { calcularTempoGasto, criarInicioOficialDoTurno } from "./tempo";
 import { validarResposta } from "./validarPalavra";
 import type { Jogador, ModoFimJogo, PalavraUsada, Partida, RegraSilaba } from "@/types/jogo";
 
@@ -132,7 +132,7 @@ export async function iniciarPartida(partida: Partida, jogadores: Jogador[]) {
       rodada_atual: 1,
       silaba_atual: sortearSilaba(),
       jogador_atual_id: primeiro.id,
-      turno_iniciado_em: new Date().toISOString()
+      turno_iniciado_em: criarInicioOficialDoTurno()
     })
     .eq("id", partida.id)
     .eq("status", "aguardando");
@@ -176,7 +176,7 @@ export async function reiniciarPartida(partida: Partida, jogadores: Jogador[]) {
       rodada_atual: 1,
       silaba_atual: sortearSilaba(partida.silaba_atual),
       jogador_atual_id: primeiro?.id ?? null,
-      turno_iniciado_em: new Date().toISOString(),
+      turno_iniciado_em: criarInicioOficialDoTurno(),
       vencedor_jogador_id: null
     })
     .eq("id", partida.id);
@@ -223,10 +223,7 @@ export async function responderTurno(params: {
     return validacao;
   }
 
-  const tempoGasto = Math.max(
-    1,
-    calcularTempoGasto(partidaAtual.turno_iniciado_em, new Date(), SEGUNDOS_CONTAGEM_REGRESSIVA)
-  );
+  const tempoGasto = Math.max(1, calcularTempoGasto(partidaAtual.turno_iniciado_em));
   const novoTempo = Math.max(0, jogadorAtual.tempo_restante - tempoGasto);
   const jogadorZerou = novoTempo <= 0;
 
@@ -295,11 +292,7 @@ export async function registrarTempoEsgotado(partida: Partida, jogadores: Jogado
 
   if (!jogadorAtual || jogadorAtual.eliminado || jogadorAtual.tempo_restante <= 0) return false;
 
-  const tempoGasto = calcularTempoGasto(
-    partidaAtual.turno_iniciado_em,
-    new Date(),
-    SEGUNDOS_CONTAGEM_REGRESSIVA
-  );
+  const tempoGasto = calcularTempoGasto(partidaAtual.turno_iniciado_em);
 
   if (tempoGasto < jogadorAtual.tempo_restante) return false;
 
@@ -353,7 +346,7 @@ export async function passarParaProximoJogador(partida: Partida, jogadores: Joga
     .from("partidas")
     .update({
       jogador_atual_id: proximo?.id ?? null,
-      turno_iniciado_em: new Date().toISOString()
+      turno_iniciado_em: criarInicioOficialDoTurno()
     })
     .eq("id", partida.id)
     .eq("jogador_atual_id", jogadorAtualId);
@@ -381,7 +374,7 @@ export async function iniciarNovaRodada(partida: Partida, jogadores: Jogador[]) 
       rodada_atual: partida.rodada_atual + 1,
       silaba_atual: sortearSilaba(partida.silaba_atual),
       jogador_atual_id: primeiro?.id ?? null,
-      turno_iniciado_em: new Date().toISOString()
+      turno_iniciado_em: criarInicioOficialDoTurno()
     })
     .eq("id", partida.id);
 
