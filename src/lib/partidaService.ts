@@ -2,7 +2,7 @@ import { carregarJogadores, proximoJogadorAtivo, todosResponderamRodada } from "
 import { salvarPalavraUsada } from "./palavrasService";
 import { sortearSilaba } from "./sortearSilaba";
 import { supabase } from "./supabaseClient";
-import { calcularTempoGasto } from "./tempo";
+import { calcularTempoGasto, SEGUNDOS_CONTAGEM_REGRESSIVA } from "./tempo";
 import { validarResposta } from "./validarPalavra";
 import type { Jogador, ModoFimJogo, PalavraUsada, Partida, RegraSilaba } from "@/types/jogo";
 
@@ -209,7 +209,10 @@ export async function responderTurno(params: {
     return validacao;
   }
 
-  const tempoGasto = Math.max(1, calcularTempoGasto(partida.turno_iniciado_em));
+  const tempoGasto = Math.max(
+    1,
+    calcularTempoGasto(partida.turno_iniciado_em, new Date(), SEGUNDOS_CONTAGEM_REGRESSIVA)
+  );
   const novoTempo = Math.max(0, jogadorAtual.tempo_restante - tempoGasto);
   const jogadorZerou = novoTempo <= 0;
 
@@ -255,12 +258,30 @@ export async function responderTurno(params: {
 }
 
 export async function registrarTempoEsgotado(partida: Partida, jogadores: Jogador[], jogadorAtualId: string) {
-  if (partida.status !== "em_andamento" || partida.jogador_atual_id !== jogadorAtualId) return;
+  const partidaAtual = await carregarPartidaPorId(partida.id);
 
-  const jogadorAtual = jogadores.find((jogador) => jogador.id === jogadorAtualId);
-  if (!jogadorAtual || jogadorAtual.eliminado || jogadorAtual.tempo_restante <= 0) return;
+  if (
+    !partidaAtual ||
+    partidaAtual.status !== "em_andamento" ||
+    partidaAtual.jogador_atual_id !== jogadorAtualId
+  ) {
+    return false;
+  }
 
-  const jogadoresAposTempo = jogadores.map((jogador) =>
+  const jogadoresAtuais = await carregarJogadores(partidaAtual.id);
+  const jogadorAtual = jogadoresAtuais.find((jogador) => jogador.id === jogadorAtualId);
+
+  if (!jogadorAtual || jogadorAtual.eliminado || jogadorAtual.tempo_restante <= 0) return false;
+
+  const tempoGasto = calcularTempoGasto(
+    partidaAtual.turno_iniciado_em,
+    new Date(),
+    SEGUNDOS_CONTAGEM_REGRESSIVA
+  );
+
+  if (tempoGasto < jogadorAtual.tempo_restante) return false;
+
+  const jogadoresAposTempo = jogadoresAtuais.map((jogador) =>
     jogador.id === jogadorAtualId
       ? { ...jogador, tempo_restante: 0, eliminado: true, respondeu_rodada_atual: true }
       : jogador
@@ -277,7 +298,8 @@ export async function registrarTempoEsgotado(partida: Partida, jogadores: Jogado
 
   if (error) throw error;
 
-  await tratarTempoEsgotado(partida, jogadoresAposTempo, jogadorAtualId);
+  await tratarTempoEsgotado(partidaAtual, jogadoresAposTempo, jogadorAtualId);
+  return true;
 }
 
 async function tratarTempoEsgotado(partida: Partida, jogadores: Jogador[], jogadorEliminadoId: string) {

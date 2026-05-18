@@ -1,7 +1,13 @@
-export function calcularTempoGasto(turnoIniciadoEm: string | null, agora = new Date()): number {
+export const SEGUNDOS_CONTAGEM_REGRESSIVA = 3;
+
+export function calcularTempoGasto(
+  turnoIniciadoEm: string | null,
+  agora = new Date(),
+  segundosDeEspera = 0
+): number {
   if (!turnoIniciadoEm) return 0;
   const inicio = new Date(turnoIniciadoEm).getTime();
-  return Math.max(0, Math.ceil((agora.getTime() - inicio) / 1000));
+  return Math.max(0, Math.ceil((agora.getTime() - inicio) / 1000) - segundosDeEspera);
 }
 
 export function formatarTempo(segundos: number): string {
@@ -11,6 +17,10 @@ export function formatarTempo(segundos: number): string {
   return `${minutos}:${resto}`;
 }
 
-export function tempoVisualRestante(tempoRestante: number, turnoIniciadoEm: string | null): number {
-  return Math.max(0, tempoRestante - calcularTempoGasto(turnoIniciadoEm));
+export function tempoVisualRestante(
+  tempoRestante: number,
+  turnoIniciadoEm: string | null,
+  segundosDeEspera = 0
+): number {
+  return Math.max(0, tempoRestante - calcularTempoGasto(turnoIniciadoEm, new Date(), segundosDeEspera));
 }

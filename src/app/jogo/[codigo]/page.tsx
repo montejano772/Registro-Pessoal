@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useMemo, useState } from "react";
+import { use, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Square } from "lucide-react";
 import { Botao } from "@/components/Botao";
@@ -58,18 +58,21 @@ export default function JogoPage({ params }: { params: Promise<{ codigo: string 
     await encerrarPartida(partida.id, null);
   }
 
-  async function tempoEsgotado() {
+  const tempoEsgotado = useCallback(async () => {
     if (!partida?.jogador_atual_id) return;
 
     try {
-      setMensagem(`Tempo esgotado para ${jogadorAtual?.nome ?? "o jogador"}`);
-      setTipoMensagem("erro");
-      await registrarTempoEsgotado(partida, jogadores, partida.jogador_atual_id);
+      const registrou = await registrarTempoEsgotado(partida, jogadores, partida.jogador_atual_id);
+
+      if (registrou) {
+        setMensagem(`Tempo esgotado para ${jogadorAtual?.nome ?? "o jogador"}`);
+        setTipoMensagem("erro");
+      }
     } catch (error) {
       setMensagem(error instanceof Error ? error.message : "Erro ao registrar tempo esgotado.");
       setTipoMensagem("erro");
     }
-  }
+  }, [jogadorAtual, jogadores, partida]);
 
   if (carregando) return <main className="pagina estado">Carregando jogo...</main>;
   if (!partida) return <main className="pagina estado">{erro || "Partida nao encontrada."}</main>;
