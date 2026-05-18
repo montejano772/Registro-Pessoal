@@ -1,6 +1,7 @@
 export type StatusPartida = "aguardando" | "em_andamento" | "finalizada";
 export type RegraSilaba = "comeca_com" | "contem";
 export type ModoFimJogo = "primeiro_eliminado" | "eliminacao";
+export type TipoTempo = "individual" | "compartilhado";
 
 export type Partida = {
   id: string;
@@ -9,6 +10,8 @@ export type Partida = {
   host_jogador_id: string | null;
   status: StatusPartida;
   tempo_inicial: number;
+  tipo_tempo: TipoTempo;
+  tempo_compartilhado_restante: number | null;
   regra_silaba: RegraSilaba;
   modo_fim_jogo: ModoFimJogo;
   rodada_atual: number;

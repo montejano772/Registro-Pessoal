@@ -8,13 +8,14 @@ import { Botao } from "@/components/Botao";
 import { MensagemJogo } from "@/components/MensagemJogo";
 import { criarPartida } from "@/lib/partidaService";
 import { salvarSessaoLocal } from "@/lib/storage";
-import type { ModoFimJogo, RegraSilaba } from "@/types/jogo";
+import type { ModoFimJogo, RegraSilaba, TipoTempo } from "@/types/jogo";
 
 export default function CriarPartidaPage() {
   const router = useRouter();
   const [nomeHost, setNomeHost] = useState("");
   const [nomePartida, setNomePartida] = useState("Partida BombQuiz");
   const [tempoInicial, setTempoInicial] = useState(60);
+  const [tipoTempo, setTipoTempo] = useState<TipoTempo>("individual");
   const [maxJogadores, setMaxJogadores] = useState(6);
   const [regraSilaba, setRegraSilaba] = useState<RegraSilaba>("comeca_com");
   const [modoFimJogo, setModoFimJogo] = useState<ModoFimJogo>("eliminacao");
@@ -31,6 +32,7 @@ export default function CriarPartidaPage() {
         nomeHost,
         nomePartida,
         tempoInicial,
+        tipoTempo,
         quantidadeMaximaJogadores: maxJogadores,
         regraSilaba,
         modoFimJogo
@@ -69,6 +71,13 @@ export default function CriarPartidaPage() {
                   {tempo} segundos
                 </option>
               ))}
+            </select>
+          </label>
+          <label>
+            Tipo de tempo
+            <select value={tipoTempo} onChange={(event) => setTipoTempo(event.target.value as TipoTempo)}>
+              <option value="individual">Individual por jogador</option>
+              <option value="compartilhado">Compartilhado da partida</option>
             </select>
           </label>
           <label>

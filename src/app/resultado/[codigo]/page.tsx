@@ -29,6 +29,7 @@ export default function ResultadoPage({ params }: { params: Promise<{ codigo: st
   );
   const eliminados = jogadores.filter((jogador) => jogador.eliminado || jogador.tempo_restante <= 0);
   const souHost = jogadorLocalId === partida?.host_jogador_id;
+  const tempoCompartilhado = partida?.tipo_tempo === "compartilhado";
 
   async function jogarNovamente() {
     if (!partida) return;
@@ -50,10 +51,14 @@ export default function ResultadoPage({ params }: { params: Promise<{ codigo: st
         {eliminados.length > 0 && (
           <p>{eliminados.map((jogador) => jogador.nome).join(", ")} perdeu por tempo esgotado.</p>
         )}
+        {tempoCompartilhado && <p>Modo tempo compartilhado: a bomba era unica para todos os jogadores.</p>}
       </section>
 
       <h2>Ranking</h2>
-      <ListaJogadores jogadores={[...jogadores].sort((a, b) => b.tempo_restante - a.tempo_restante)} />
+      <ListaJogadores
+        jogadores={[...jogadores].sort((a, b) => Number(a.eliminado) - Number(b.eliminado))}
+        mostrarTempo={!tempoCompartilhado}
+      />
 
       <section className="palavras-usadas">
         <h2>Palavras usadas</h2>

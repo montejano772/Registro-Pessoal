@@ -37,6 +37,10 @@ export default function JogoPage({ params }: { params: Promise<{ codigo: string 
   );
   const souJogadorAtual = !!jogadorLocalId && jogadorLocalId === partida?.jogador_atual_id;
   const souHost = !!jogadorLocalId && jogadorLocalId === partida?.host_jogador_id;
+  const tempoCompartilhado = partida?.tipo_tempo === "compartilhado";
+  const tempoDoCronometro = tempoCompartilhado
+    ? partida?.tempo_compartilhado_restante ?? partida?.tempo_inicial ?? 0
+    : jogadorAtual?.tempo_restante ?? 0;
 
   async function responder(palavra: string) {
     if (!partida || !jogadorLocalId) return;
@@ -90,11 +94,11 @@ export default function JogoPage({ params }: { params: Promise<{ codigo: string 
       </section>
 
       <section className="arena">
-        <p>Silaba atual</p>
+        <p>{tempoCompartilhado ? "Silaba atual - tempo compartilhado" : "Silaba atual"}</p>
         <h1>{partida.silaba_atual}</h1>
         {jogadorAtual && (
           <Cronometro
-            tempoRestante={jogadorAtual.tempo_restante}
+            tempoRestante={tempoDoCronometro}
             turnoIniciadoEm={partida.turno_iniciado_em}
             ativo={!!partida.turno_iniciado_em}
             onTempoEsgotado={souJogadorAtual ? tempoEsgotado : undefined}
@@ -106,7 +110,11 @@ export default function JogoPage({ params }: { params: Promise<{ codigo: string 
       {!souJogadorAtual && <p className="aviso">Aguardando resposta de {jogadorAtual?.nome ?? "outro jogador"}</p>}
       <MensagemJogo mensagem={mensagem || erro} tipo={erro ? "erro" : tipoMensagem} />
 
-      <ListaJogadores jogadores={jogadores} jogadorAtualId={partida.jogador_atual_id} />
+      <ListaJogadores
+        jogadores={jogadores}
+        jogadorAtualId={partida.jogador_atual_id}
+        mostrarTempo={!tempoCompartilhado}
+      />
 
       {souHost && (
         <Botao variante="perigo" onClick={finalizar}>

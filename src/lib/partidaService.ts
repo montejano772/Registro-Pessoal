@@ -4,7 +4,7 @@ import { sortearSilaba } from "./sortearSilaba";
 import { supabase } from "./supabaseClient";
 import { calcularTempoGasto, criarInicioOficialDoTurno } from "./tempo";
 import { validarResposta } from "./validarPalavra";
-import type { Jogador, ModoFimJogo, PalavraUsada, Partida, RegraSilaba } from "@/types/jogo";
+import type { Jogador, ModoFimJogo, PalavraUsada, Partida, RegraSilaba, TipoTempo } from "@/types/jogo";
 
 export function gerarCodigoSala(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -33,6 +33,7 @@ export async function criarPartida(input: {
   nomePartida: string;
   nomeHost: string;
   tempoInicial: number;
+  tipoTempo: TipoTempo;
   quantidadeMaximaJogadores: number;
   regraSilaba: RegraSilaba;
   modoFimJogo: ModoFimJogo;
@@ -50,6 +51,8 @@ export async function criarPartida(input: {
         nome: input.nomePartida,
         status: "aguardando",
         tempo_inicial: input.tempoInicial,
+        tipo_tempo: input.tipoTempo,
+        tempo_compartilhado_restante: input.tipoTempo === "compartilhado" ? input.tempoInicial : null,
         regra_silaba: input.regraSilaba,
         modo_fim_jogo: input.modoFimJogo,
         rodada_atual: 1,
@@ -131,6 +134,8 @@ export async function iniciarPartida(partida: Partida, jogadores: Jogador[]) {
       status: "em_andamento",
       rodada_atual: 1,
       silaba_atual: sortearSilaba(),
+      tempo_compartilhado_restante:
+        partida.tipo_tempo === "compartilhado" ? partida.tempo_compartilhado_restante ?? partida.tempo_inicial : null,
       jogador_atual_id: primeiro.id,
       turno_iniciado_em: criarInicioOficialDoTurno()
     })
@@ -175,6 +180,7 @@ export async function reiniciarPartida(partida: Partida, jogadores: Jogador[]) {
       status: "em_andamento",
       rodada_atual: 1,
       silaba_atual: sortearSilaba(partida.silaba_atual),
+      tempo_compartilhado_restante: partida.tipo_tempo === "compartilhado" ? partida.tempo_inicial : null,
       jogador_atual_id: primeiro?.id ?? null,
       turno_iniciado_em: criarInicioOficialDoTurno(),
       vencedor_jogador_id: null
@@ -224,7 +230,11 @@ export async function responderTurno(params: {
   }
 
   const tempoGasto = Math.max(1, calcularTempoGasto(partidaAtual.turno_iniciado_em));
-  const novoTempo = Math.max(0, jogadorAtual.tempo_restante - tempoGasto);
+  const tempoBase =
+    partidaAtual.tipo_tempo === "compartilhado"
+      ? partidaAtual.tempo_compartilhado_restante ?? partidaAtual.tempo_inicial
+      : jogadorAtual.tempo_restante;
+  const novoTempo = Math.max(0, tempoBase - tempoGasto);
   const jogadorZerou = novoTempo <= 0;
 
   try {
@@ -249,23 +259,37 @@ export async function responderTurno(params: {
     jogador.id === jogadorAtual.id
       ? {
           ...jogador,
-          tempo_restante: novoTempo,
+          tempo_restante: partidaAtual.tipo_tempo === "compartilhado" ? jogador.tempo_restante : novoTempo,
           eliminado: jogadorZerou || jogador.eliminado,
           respondeu_rodada_atual: true
         }
       : jogador
   );
 
-  const { error: jogadorError } = await supabase
-    .from("jogadores")
-    .update({
-      tempo_restante: novoTempo,
-      eliminado: jogadorZerou || jogadorAtual.eliminado,
-      respondeu_rodada_atual: true
-    })
-    .eq("id", jogadorAtual.id);
+  const atualizacaoJogador =
+    partidaAtual.tipo_tempo === "compartilhado"
+      ? {
+          eliminado: jogadorZerou || jogadorAtual.eliminado,
+          respondeu_rodada_atual: true
+        }
+      : {
+          tempo_restante: novoTempo,
+          eliminado: jogadorZerou || jogadorAtual.eliminado,
+          respondeu_rodada_atual: true
+        };
+
+  const { error: jogadorError } = await supabase.from("jogadores").update(atualizacaoJogador).eq("id", jogadorAtual.id);
 
   if (jogadorError) throw jogadorError;
+
+  if (partidaAtual.tipo_tempo === "compartilhado" && !jogadorZerou) {
+    const { error: partidaError } = await supabase
+      .from("partidas")
+      .update({ tempo_compartilhado_restante: novoTempo })
+      .eq("id", partidaAtual.id);
+
+    if (partidaError) throw partidaError;
+  }
 
   if (jogadorZerou) {
     await tratarTempoEsgotado(partidaAtual, jogadoresAposResposta, jogadorAtual.id);
@@ -290,11 +314,18 @@ export async function registrarTempoEsgotado(partida: Partida, jogadores: Jogado
   const jogadoresAtuais = await carregarJogadores(partidaAtual.id);
   const jogadorAtual = jogadoresAtuais.find((jogador) => jogador.id === jogadorAtualId);
 
-  if (!jogadorAtual || jogadorAtual.eliminado || jogadorAtual.tempo_restante <= 0) return false;
+  if (!jogadorAtual || jogadorAtual.eliminado) return false;
+
+  const tempoBase =
+    partidaAtual.tipo_tempo === "compartilhado"
+      ? partidaAtual.tempo_compartilhado_restante ?? partidaAtual.tempo_inicial
+      : jogadorAtual.tempo_restante;
+
+  if (tempoBase <= 0) return false;
 
   const tempoGasto = calcularTempoGasto(partidaAtual.turno_iniciado_em);
 
-  if (tempoGasto < jogadorAtual.tempo_restante) return false;
+  if (tempoGasto < tempoBase) return false;
 
   const jogadoresAposTempo = jogadoresAtuais.map((jogador) =>
     jogador.id === jogadorAtualId
@@ -302,16 +333,30 @@ export async function registrarTempoEsgotado(partida: Partida, jogadores: Jogado
       : jogador
   );
 
-  const { error } = await supabase
-    .from("jogadores")
-    .update({
-      tempo_restante: 0,
-      eliminado: true,
-      respondeu_rodada_atual: true
-    })
-    .eq("id", jogadorAtualId);
+  const atualizacaoJogador =
+    partidaAtual.tipo_tempo === "compartilhado"
+      ? {
+          eliminado: true,
+          respondeu_rodada_atual: true
+        }
+      : {
+          tempo_restante: 0,
+          eliminado: true,
+          respondeu_rodada_atual: true
+        };
+
+  const { error } = await supabase.from("jogadores").update(atualizacaoJogador).eq("id", jogadorAtualId);
 
   if (error) throw error;
+
+  if (partidaAtual.tipo_tempo === "compartilhado") {
+    const { error: partidaError } = await supabase
+      .from("partidas")
+      .update({ tempo_compartilhado_restante: 0 })
+      .eq("id", partidaAtual.id);
+
+    if (partidaError) throw partidaError;
+  }
 
   await tratarTempoEsgotado(partidaAtual, jogadoresAposTempo, jogadorAtualId);
   return true;
@@ -330,6 +375,15 @@ async function tratarTempoEsgotado(partida: Partida, jogadores: Jogador[], jogad
   if (ativos.length <= 1) {
     await encerrarPartida(partida.id, ativos[0]?.id ?? null);
     return;
+  }
+
+  if (partida.tipo_tempo === "compartilhado") {
+    const { error } = await supabase
+      .from("partidas")
+      .update({ tempo_compartilhado_restante: partida.tempo_inicial })
+      .eq("id", partida.id);
+
+    if (error) throw error;
   }
 
   await passarParaProximoJogador(partida, jogadores, jogadorEliminadoId);

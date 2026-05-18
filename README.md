@@ -96,3 +96,16 @@ npm run importar:palavras
 ```
 
 A fonte e os filtros aplicados ficam documentados em `src/data/palavras-fonte.md`.
+
+## Migracoes
+
+Se o banco ja existe e voce quer habilitar o modo de tempo compartilhado, execute no SQL Editor do Supabase:
+
+```sql
+-- arquivo: supabase-migracao-tipo-tempo.sql
+```
+
+Esse script adiciona em `partidas`:
+
+- `tipo_tempo`
+- `tempo_compartilhado_restante`
