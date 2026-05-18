@@ -1,5 +1,5 @@
 import { carregarJogadores, proximoJogadorAtivo, todosResponderamRodada } from "./jogadorService";
-import { salvarPalavraUsada } from "./palavrasService";
+import { carregarPalavrasUsadas, salvarPalavraUsada } from "./palavrasService";
 import { sortearSilaba } from "./sortearSilaba";
 import { supabase } from "./supabaseClient";
 import { calcularTempoGasto, SEGUNDOS_CONTAGEM_REGRESSIVA } from "./tempo";
@@ -192,7 +192,21 @@ export async function responderTurno(params: {
   palavra: string;
 }) {
   const { partida, jogadorLocalId, jogadores, palavrasUsadas, palavra } = params;
-  const jogadorAtual = jogadores.find((jogador) => jogador.id === partida.jogador_atual_id);
+  const partidaAtual = await carregarPartidaPorId(partida.id);
+
+  if (!partidaAtual || partidaAtual.status !== "em_andamento") {
+    throw new Error("Essa partida nao esta em andamento.");
+  }
+
+  if (partidaAtual.jogador_atual_id !== jogadorLocalId) {
+    throw new Error("Apenas o jogador da vez pode responder.");
+  }
+
+  const [jogadoresAtuais, palavrasUsadasAtuais] = await Promise.all([
+    carregarJogadores(partidaAtual.id),
+    carregarPalavrasUsadas(partidaAtual.id)
+  ]);
+  const jogadorAtual = jogadoresAtuais.find((jogador) => jogador.id === partidaAtual.jogador_atual_id);
 
   if (!jogadorAtual || jogadorAtual.id !== jogadorLocalId) {
     throw new Error("Apenas o jogador da vez pode responder.");
@@ -200,9 +214,9 @@ export async function responderTurno(params: {
 
   const validacao = validarResposta({
     palavra,
-    silaba: partida.silaba_atual,
-    regra: partida.regra_silaba,
-    usadas: palavrasUsadas
+    silaba: partidaAtual.silaba_atual,
+    regra: partidaAtual.regra_silaba,
+    usadas: palavrasUsadasAtuais.length > 0 ? palavrasUsadasAtuais : palavrasUsadas
   });
 
   if (!validacao.ok || !validacao.palavraNormalizada) {
@@ -211,22 +225,30 @@ export async function responderTurno(params: {
 
   const tempoGasto = Math.max(
     1,
-    calcularTempoGasto(partida.turno_iniciado_em, new Date(), SEGUNDOS_CONTAGEM_REGRESSIVA)
+    calcularTempoGasto(partidaAtual.turno_iniciado_em, new Date(), SEGUNDOS_CONTAGEM_REGRESSIVA)
   );
   const novoTempo = Math.max(0, jogadorAtual.tempo_restante - tempoGasto);
   const jogadorZerou = novoTempo <= 0;
 
-  await salvarPalavraUsada({
-    partida_id: partida.id,
-    jogador_id: jogadorAtual.id,
-    palavra,
-    palavra_normalizada: validacao.palavraNormalizada,
-    silaba: partida.silaba_atual,
-    rodada: partida.rodada_atual,
-    tempo_gasto: tempoGasto
-  });
+  try {
+    await salvarPalavraUsada({
+      partida_id: partidaAtual.id,
+      jogador_id: jogadorAtual.id,
+      palavra,
+      palavra_normalizada: validacao.palavraNormalizada,
+      silaba: partidaAtual.silaba_atual,
+      rodada: partidaAtual.rodada_atual,
+      tempo_gasto: tempoGasto
+    });
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "23505") {
+      return { ok: false, mensagem: "Essa palavra ja foi usada", palavraNormalizada: validacao.palavraNormalizada };
+    }
 
-  const jogadoresAposResposta = jogadores.map((jogador) =>
+    throw error;
+  }
+
+  const jogadoresAposResposta = jogadoresAtuais.map((jogador) =>
     jogador.id === jogadorAtual.id
       ? {
           ...jogador,
@@ -249,11 +271,11 @@ export async function responderTurno(params: {
   if (jogadorError) throw jogadorError;
 
   if (jogadorZerou) {
-    await tratarTempoEsgotado(partida, jogadoresAposResposta, jogadorAtual.id);
+    await tratarTempoEsgotado(partidaAtual, jogadoresAposResposta, jogadorAtual.id);
     return { ok: true, mensagem: "Tempo esgotado", palavraNormalizada: validacao.palavraNormalizada };
   }
 
-  await passarParaProximoJogador(partida, jogadoresAposResposta, jogadorAtual.id);
+  await passarParaProximoJogador(partidaAtual, jogadoresAposResposta, jogadorAtual.id);
   return validacao;
 }
 

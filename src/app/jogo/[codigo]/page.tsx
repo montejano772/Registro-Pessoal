@@ -94,7 +94,7 @@ export default function JogoPage({ params }: { params: Promise<{ codigo: string 
             tempoRestante={jogadorAtual.tempo_restante}
             turnoIniciadoEm={partida.turno_iniciado_em}
             ativo={!!partida.turno_iniciado_em}
-            onTempoEsgotado={tempoEsgotado}
+            onTempoEsgotado={souJogadorAtual ? tempoEsgotado : undefined}
           />
         )}
       </section>
