@@ -160,13 +160,13 @@ export async function reiniciarPartida(partida: Partida, jogadores: Jogador[]) {
     .update({
       tempo_restante: partida.tempo_inicial,
       eliminado: false,
+      conectado: true,
       respondeu_rodada_atual: false
     })
     .eq("partida_id", partida.id);
 
   if (jogadoresError) throw jogadoresError;
 
-  const primeiro = jogadores.sort((a, b) => a.ordem - b.ordem)[0];
   const { error: palavrasError } = await supabase
     .from("palavras_usadas")
     .delete()
@@ -177,12 +177,12 @@ export async function reiniciarPartida(partida: Partida, jogadores: Jogador[]) {
   const { error } = await supabase
     .from("partidas")
     .update({
-      status: "em_andamento",
+      status: "aguardando",
       rodada_atual: 1,
-      silaba_atual: sortearSilaba(partida.silaba_atual),
+      silaba_atual: "",
       tempo_compartilhado_restante: partida.tipo_tempo === "compartilhado" ? partida.tempo_inicial : null,
-      jogador_atual_id: primeiro?.id ?? null,
-      turno_iniciado_em: criarInicioOficialDoTurno(),
+      jogador_atual_id: null,
+      turno_iniciado_em: null,
       vencedor_jogador_id: null
     })
     .eq("id", partida.id);

@@ -34,7 +34,7 @@ export default function ResultadoPage({ params }: { params: Promise<{ codigo: st
   async function jogarNovamente() {
     if (!partida) return;
     await reiniciarPartida(partida, jogadores);
-    router.push(`/jogo/${partida.codigo_sala}`);
+    router.push(`/lobby/${partida.codigo_sala}`);
   }
 
   function voltarInicio() {
