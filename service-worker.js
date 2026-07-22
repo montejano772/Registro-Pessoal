@@ -1,4 +1,4 @@
-const CACHE_NAME = "caderno-pessoal-v1";
+﻿const CACHE_NAME = "caderno-pessoal-v2";
 const ASSETS = [
   "./",
   "./index.html",

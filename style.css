@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --bg: #f6f7f4;
   --text: #18211f;
   --muted: #66716d;
@@ -17,9 +17,18 @@
   box-sizing: border-box;
 }
 
+html {
+  width: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
+  width: 100%;
   min-height: 100vh;
   margin: 0;
+  overflow-x: hidden;
   background: var(--bg);
   color: var(--text);
 }
@@ -27,29 +36,39 @@ body {
 button,
 input {
   font: inherit;
+  font-size: 16px;
 }
 
 #app {
-  width: min(760px, 100%);
+  width: 100%;
+  max-width: 760px;
   min-height: 100vh;
   margin: 0 auto;
-  padding: env(safe-area-inset-top) 16px 28px;
+  padding-top: max(14px, env(safe-area-inset-top));
+  padding-right: max(14px, env(safe-area-inset-right));
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  padding-left: max(14px, env(safe-area-inset-left));
 }
 
 .topbar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 0 12px;
+  padding: 10px 0 12px;
+}
+
+.topbar > div {
+  min-width: 0;
 }
 
 .eyebrow {
   margin: 0 0 4px;
   color: var(--teal);
-  font-size: 0.78rem;
+  font-size: clamp(0.72rem, 2.8vw, 0.78rem);
   font-weight: 800;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 h1,
@@ -60,12 +79,16 @@ p {
 
 h1 {
   margin-bottom: 0;
-  font-size: 1.85rem;
+  font-size: clamp(1.65rem, 8vw, 2.45rem);
+  line-height: 1.04;
+  overflow-wrap: anywhere;
 }
 
 h2 {
   margin-bottom: 0;
-  font-size: 1.15rem;
+  font-size: clamp(1.05rem, 5vw, 1.35rem);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .screen {
@@ -121,7 +144,19 @@ input[type="file"] {
   border-radius: 8px;
   background: #fff;
   color: var(--text);
-  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.date-button {
+  font-size: 1.15rem;
+}
+
+.icon-button {
+  flex: 0 0 auto;
+  min-width: 68px;
+  max-width: 86px;
+  padding: 0 10px;
+  color: var(--teal-dark);
 }
 
 .summary-grid,
@@ -209,6 +244,7 @@ input[type="file"] {
   background: transparent;
   color: var(--teal-dark);
   padding-inline: 0;
+  white-space: nowrap;
 }
 
 .wide {
@@ -216,7 +252,7 @@ input[type="file"] {
 }
 
 .section-header {
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   margin: 18px 0 10px;
 }
@@ -237,7 +273,7 @@ input[type="file"] {
 
 .transaction-item {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
   min-height: 62px;
@@ -391,7 +427,8 @@ legend {
 
 @media (max-width: 520px) {
   #app {
-    padding-inline: 12px;
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-left: max(12px, env(safe-area-inset-left));
   }
 
   .summary-grid,
@@ -403,6 +440,20 @@ legend {
   .summary-card,
   .balance-card {
     min-height: 92px;
+  }
+
+  .form-card,
+  .list-panel {
+    padding: 12px;
+  }
+
+  .segmented {
+    gap: 8px;
+  }
+
+  .segmented label {
+    min-height: 52px;
+    padding: 8px;
   }
 }
 

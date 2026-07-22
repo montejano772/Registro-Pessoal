@@ -1,4 +1,4 @@
-const DB_NAME = "caderno-pessoal-db";
+﻿const DB_NAME = "caderno-pessoal-db";
 const STORE = "transactions";
 const SETTINGS = "settings";
 const DB_VERSION = 1;
@@ -440,7 +440,8 @@ function bindEvents() {
 
   $("entryForm").addEventListener("submit", async (event) => {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.target;
+    const form = new FormData(formElement);
     try {
       await saveTransaction({
         description: form.get("description"),
@@ -448,7 +449,7 @@ function bindEvents() {
         type: form.get("type"),
         date: form.get("date"),
       });
-      event.currentTarget.reset();
+      formElement.reset();
       document.querySelector("input[name='type'][value='expense']").checked = true;
       $("entryDate").value = $("selectedDate").value;
       await loadTransactions();
