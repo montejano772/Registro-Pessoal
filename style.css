@@ -487,3 +487,184 @@ legend {
     box-shadow: none;
   }
 }
+
+/* Compact mobile pass for iPhone/PWA viewports. */
+@media (max-width: 640px) {
+  body {
+    font-size: 15px;
+  }
+
+  #app {
+    max-width: 100%;
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-left: max(16px, env(safe-area-inset-left));
+  }
+
+  .topbar {
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0 14px;
+  }
+
+  .eyebrow {
+    font-size: 0.72rem;
+    line-height: 1.1;
+  }
+
+  h1 {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  h2 {
+    font-size: 1.22rem;
+  }
+
+  .icon-button {
+    min-width: 62px;
+    max-width: 74px;
+    min-height: 44px;
+    padding: 0 8px;
+    font-size: 0.82rem;
+  }
+
+  .date-strip {
+    grid-template-columns: 48px minmax(0, 1fr) 48px;
+    gap: 8px;
+    margin: 8px 0 12px;
+  }
+
+  .date-picker {
+    min-width: 0;
+  }
+
+  input[type="date"],
+  input[type="text"],
+  input[type="password"],
+  input[type="file"] {
+    min-width: 0;
+    min-height: 48px;
+    padding: 10px 12px;
+    font-size: 16px;
+  }
+
+  .summary-grid,
+  .action-grid,
+  .date-range,
+  .import-tools {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .summary-card,
+  .balance-card {
+    min-height: 86px;
+    gap: 6px;
+    padding: 14px 16px;
+  }
+
+  .summary-card span,
+  .balance-card span {
+    font-size: 0.95rem;
+  }
+
+  .summary-card strong,
+  .balance-card strong {
+    font-size: 1.65rem;
+    line-height: 1.08;
+    word-break: break-word;
+  }
+
+  .primary-action,
+  .secondary-action,
+  .file-button {
+    min-height: 50px;
+    padding: 10px 12px;
+    font-size: 1rem;
+  }
+
+  .form-card,
+  .list-panel {
+    padding: 14px;
+  }
+
+  .section-header {
+    gap: 8px;
+    margin: 14px 0 10px;
+  }
+
+  .section-header span {
+    justify-self: end;
+    max-width: 42vw;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+    text-align: right;
+  }
+
+  .segmented {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .segmented label {
+    min-width: 0;
+    min-height: 48px;
+    padding: 8px 6px;
+    font-size: 1rem;
+  }
+
+  .transaction-item {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    min-height: 0;
+    padding: 12px;
+  }
+
+  .transaction-item > div:last-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .transaction-title {
+    font-size: 1rem;
+  }
+
+  .transaction-meta {
+    display: block;
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .transaction-value {
+    font-size: 1.08rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 380px) {
+  #app {
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-left: max(12px, env(safe-area-inset-left));
+  }
+
+  h1 {
+    font-size: 1.72rem;
+  }
+
+  .date-strip {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+  }
+
+  .summary-card strong,
+  .balance-card strong {
+    font-size: 1.42rem;
+  }
+
+  .segmented {
+    grid-template-columns: 1fr;
+  }
+}
