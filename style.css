@@ -1,0 +1,438 @@
+:root {
+  --bg: #f6f7f4;
+  --text: #18211f;
+  --muted: #66716d;
+  --line: #dfe4dd;
+  --surface: #ffffff;
+  --teal: #0f766e;
+  --teal-dark: #0b5f59;
+  --green: #16754f;
+  --red: #b53b35;
+  --amber: #b77716;
+  --shadow: 0 18px 45px rgba(24, 33, 31, 0.08);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+#app {
+  width: min(760px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: env(safe-area-inset-top) 16px 28px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 0 12px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--teal);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: 1.85rem;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: 1.15rem;
+}
+
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
+
+.date-strip,
+.summary-grid,
+.action-grid,
+.date-range,
+.import-tools,
+.section-header,
+.segmented {
+  display: grid;
+  gap: 10px;
+}
+
+.date-strip {
+  grid-template-columns: 46px 1fr 46px;
+  align-items: end;
+  margin: 10px 0 14px;
+}
+
+.date-picker,
+.form-card label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+input[type="date"],
+input[type="text"],
+input[type="password"],
+input[type="file"] {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  padding: 13px 12px;
+}
+
+.date-button,
+.icon-button {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font-size: 1.35rem;
+}
+
+.summary-grid,
+.action-grid,
+.date-range {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.summary-card,
+.balance-card,
+.form-card,
+.list-panel,
+.notice,
+.lock-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.summary-card,
+.balance-card {
+  display: grid;
+  gap: 10px;
+  min-height: 108px;
+  padding: 18px;
+}
+
+.summary-card span,
+.balance-card span,
+.transaction-meta,
+.hint {
+  color: var(--muted);
+}
+
+.summary-card strong,
+.balance-card strong {
+  font-size: 1.45rem;
+}
+
+.summary-card.income {
+  border-left: 6px solid var(--green);
+}
+
+.summary-card.expense {
+  border-left: 6px solid var(--red);
+}
+
+.balance-card {
+  margin: 12px 0 14px;
+  border-left: 6px solid var(--amber);
+}
+
+.primary-action,
+.secondary-action,
+.text-button,
+.file-button {
+  min-height: 48px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 12px 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primary-action {
+  background: var(--teal);
+  color: #fff;
+}
+
+.primary-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.secondary-action,
+.file-button {
+  background: #fff;
+  border-color: var(--line);
+  color: var(--teal-dark);
+  text-align: center;
+}
+
+.text-button {
+  background: transparent;
+  color: var(--teal-dark);
+  padding-inline: 0;
+}
+
+.wide {
+  width: 100%;
+}
+
+.section-header {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  margin: 18px 0 10px;
+}
+
+.section-header span {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.list-panel {
+  padding: 14px;
+}
+
+.transaction-list {
+  display: grid;
+  gap: 8px;
+}
+
+.transaction-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 62px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfa;
+  padding: 10px 12px;
+}
+
+.transaction-title {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 800;
+  word-break: break-word;
+}
+
+.transaction-meta {
+  font-size: 0.82rem;
+}
+
+.transaction-value {
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.transaction-value.income {
+  color: var(--green);
+}
+
+.transaction-value.expense {
+  color: var(--red);
+}
+
+.delete-button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.form-card {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+
+fieldset {
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+legend {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.segmented {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.segmented label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.hint {
+  margin-bottom: 0;
+  font-size: 0.88rem;
+}
+
+.file-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.file-button input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.notice {
+  margin-top: 14px;
+  padding: 14px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.toast {
+  position: fixed;
+  right: 16px;
+  bottom: 22px;
+  left: 16px;
+  display: none;
+  max-width: 720px;
+  margin: 0 auto;
+  border-radius: 8px;
+  background: #18211f;
+  color: #fff;
+  padding: 13px 14px;
+  box-shadow: var(--shadow);
+}
+
+.toast.show {
+  display: block;
+}
+
+.lock-screen {
+  position: fixed;
+  inset: 0;
+  display: none;
+  place-items: center;
+  padding: 18px;
+  background: rgba(246, 247, 244, 0.96);
+}
+
+.lock-screen.active {
+  display: grid;
+}
+
+.lock-card {
+  display: grid;
+  gap: 14px;
+  width: min(420px, 100%);
+  padding: 20px;
+}
+
+.lock-card p {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+.empty-state {
+  padding: 24px 10px;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  #app {
+    padding-inline: 12px;
+  }
+
+  .summary-grid,
+  .action-grid,
+  .date-range {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-card,
+  .balance-card {
+    min-height: 92px;
+  }
+}
+
+@media print {
+  .topbar,
+  .form-card,
+  .text-button,
+  .action-grid,
+  .date-strip,
+  .balance-card,
+  .summary-grid,
+  .delete-button {
+    display: none !important;
+  }
+
+  #app {
+    width: 100%;
+    padding: 0;
+  }
+
+  .screen {
+    display: none !important;
+  }
+
+  #screen-reports {
+    display: block !important;
+  }
+
+  .list-panel {
+    border: 0;
+    box-shadow: none;
+  }
+}

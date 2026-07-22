@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f766e" />
+    <meta
+      name="description"
+      content="Caderno pessoal offline para registrar entradas, saidas, relatorios e backups locais."
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Caderno" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Caderno Pessoal</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+    <link rel="icon" href="icons/icon-192.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Caderno Pessoal</p>
+          <h1>Registros</h1>
+        </div>
+        <button class="icon-button" id="lockButton" type="button" aria-label="Bloquear app">🔒</button>
+      </header>
+
+      <main>
+        <section class="screen active" id="screen-home" aria-labelledby="homeTitle">
+          <div class="date-strip">
+            <button class="date-button" id="previousDay" type="button" aria-label="Dia anterior">‹</button>
+            <label class="date-picker">
+              <span id="homeTitle">Data</span>
+              <input id="selectedDate" type="date" />
+            </label>
+            <button class="date-button" id="nextDay" type="button" aria-label="Proximo dia">›</button>
+          </div>
+
+          <div class="summary-grid" aria-label="Resumo do mes">
+            <article class="summary-card income">
+              <span>Entrou no mes</span>
+              <strong id="monthIncome">R$ 0,00</strong>
+            </article>
+            <article class="summary-card expense">
+              <span>Saiu no mes</span>
+              <strong id="monthExpense">R$ 0,00</strong>
+            </article>
+          </div>
+
+          <article class="balance-card">
+            <span>Saldo do mes</span>
+            <strong id="monthBalance">R$ 0,00</strong>
+          </article>
+
+          <nav class="action-grid" aria-label="Acoes principais">
+            <button class="primary-action" data-nav="entry" type="button">Novo lancamento</button>
+            <button class="secondary-action" data-nav="import" type="button">Importar banco</button>
+            <button class="secondary-action" data-nav="reports" type="button">Relatorios</button>
+            <button class="secondary-action" data-nav="backup" type="button">Backup</button>
+          </nav>
+
+          <section class="list-panel" aria-labelledby="dayListTitle">
+            <div class="section-header">
+              <h2 id="dayListTitle">Lancamentos do dia</h2>
+              <span id="dayTotal">R$ 0,00</span>
+            </div>
+            <div class="transaction-list" id="dayTransactions"></div>
+          </section>
+        </section>
+
+        <section class="screen" id="screen-entry" aria-labelledby="entryTitle">
+          <div class="section-header">
+            <h2 id="entryTitle">Novo lancamento</h2>
+            <button class="text-button" data-nav="home" type="button">Voltar</button>
+          </div>
+
+          <form class="form-card" id="entryForm">
+            <label>
+              Texto
+              <input id="description" name="description" type="text" autocomplete="off" required maxlength="80" />
+            </label>
+            <label>
+              Valor
+              <input id="amount" name="amount" type="text" inputmode="decimal" placeholder="0,00" required />
+            </label>
+            <fieldset>
+              <legend>Tipo</legend>
+              <div class="segmented">
+                <label><input type="radio" name="type" value="income" /> Entrada</label>
+                <label><input type="radio" name="type" value="expense" checked /> Saida</label>
+              </div>
+            </fieldset>
+            <label>
+              Data
+              <input id="entryDate" name="date" type="date" required />
+            </label>
+            <button class="primary-action wide" type="submit">Salvar</button>
+          </form>
+        </section>
+
+        <section class="screen" id="screen-import" aria-labelledby="importTitle">
+          <div class="section-header">
+            <h2 id="importTitle">Importar banco</h2>
+            <button class="text-button" data-nav="home" type="button">Voltar</button>
+          </div>
+
+          <div class="form-card">
+            <label>
+              Arquivo CSV ou OFX
+              <input id="bankFile" type="file" accept=".csv,.ofx,.txt,text/csv" />
+            </label>
+            <p class="hint">A importacao acontece no aparelho. Confira a previa antes de salvar.</p>
+            <div class="import-tools">
+              <button class="secondary-action" id="clearImport" type="button">Limpar previa</button>
+              <button class="primary-action" id="confirmImport" type="button" disabled>Importar</button>
+            </div>
+          </div>
+
+          <section class="list-panel">
+            <div class="section-header">
+              <h2>Previa</h2>
+              <span id="importCount">0 itens</span>
+            </div>
+            <div class="transaction-list" id="importPreview"></div>
+          </section>
+        </section>
+
+        <section class="screen" id="screen-reports" aria-labelledby="reportsTitle">
+          <div class="section-header">
+            <h2 id="reportsTitle">Relatorios</h2>
+            <button class="text-button" data-nav="home" type="button">Voltar</button>
+          </div>
+
+          <div class="form-card">
+            <fieldset>
+              <legend>Periodo</legend>
+              <div class="segmented">
+                <label><input type="radio" name="reportMode" value="day" checked /> Dia</label>
+                <label><input type="radio" name="reportMode" value="month" /> Mes</label>
+                <label><input type="radio" name="reportMode" value="custom" /> Livre</label>
+              </div>
+            </fieldset>
+            <div class="date-range">
+              <label>
+                Inicio
+                <input id="reportStart" type="date" />
+              </label>
+              <label>
+                Fim
+                <input id="reportEnd" type="date" />
+              </label>
+            </div>
+            <div class="import-tools">
+              <button class="secondary-action" id="printReport" type="button">Imprimir</button>
+              <button class="primary-action" id="shareReport" type="button">Compartilhar</button>
+            </div>
+          </div>
+
+          <section class="list-panel">
+            <div class="section-header">
+              <h2>Resultado</h2>
+              <span id="reportSummary">R$ 0,00</span>
+            </div>
+            <div class="transaction-list report" id="reportList"></div>
+          </section>
+        </section>
+
+        <section class="screen" id="screen-backup" aria-labelledby="backupTitle">
+          <div class="section-header">
+            <h2 id="backupTitle">Backup</h2>
+            <button class="text-button" data-nav="home" type="button">Voltar</button>
+          </div>
+
+          <div class="form-card">
+            <label>
+              Senha do backup
+              <input id="backupPassword" type="password" autocomplete="new-password" placeholder="Opcional, mas recomendado" />
+            </label>
+            <div class="import-tools">
+              <button class="primary-action" id="exportBackup" type="button">Exportar backup</button>
+              <label class="file-button">
+                Importar backup
+                <input id="restoreBackup" type="file" accept=".json,.caderno" />
+              </label>
+            </div>
+            <p class="hint" id="backupStatus">Nenhum backup feito neste aparelho.</p>
+          </div>
+
+          <div class="notice">
+            Os dados ficam neste aparelho. Faca backup antes de limpar o Safari, trocar de celular ou remover o app da tela inicial.
+          </div>
+        </section>
+      </main>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+      <section class="lock-screen" id="lockScreen" aria-labelledby="lockTitle">
+        <div class="lock-card">
+          <h2 id="lockTitle">Caderno bloqueado</h2>
+          <p>Use uma senha local para proteger a abertura nesta tela.</p>
+          <label>
+            Senha
+            <input id="appPassword" type="password" autocomplete="current-password" />
+          </label>
+          <button class="primary-action wide" id="unlockButton" type="button">Entrar</button>
+          <button class="text-button wide" id="setupPasswordButton" type="button">Definir primeira senha</button>
+        </div>
+      </section>
+    </div>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

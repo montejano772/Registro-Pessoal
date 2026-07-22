@@ -1,28 +1,10 @@
 {
-  "name": "bombquiz",
-  "version": "0.1.0",
+  "name": "caderno-pessoal",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "importar:palavras": "node scripts/importar-palavras.mjs"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.43.4",
-    "lucide-react": "^0.468.0",
-    "next": "^16.2.6",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6"
-  },
-  "devDependencies": {
-    "@types/node": "^25.7.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "eslint": "^9.39.4",
-    "eslint-config-next": "^16.2.6",
-    "typescript": "^6.0.3"
+    "build": "node --check app.js",
+    "start": "npx serve .",
+    "check": "node --check app.js"
   }
 }
